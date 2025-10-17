@@ -37,9 +37,10 @@ class DroidBackend:
                                     thresh=self.backend_thresh,
                                     beta=self.beta)
 
-        graph.update_lowmem(steps=steps)
+        valid_errors = graph.update_lowmem(steps=steps)
         graph.clear_edges()
         self.video.dirty[:t] = True
+        return valid_errors
 
 
 class DroidAsyncBackend:

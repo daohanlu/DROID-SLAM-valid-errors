@@ -328,6 +328,18 @@ class FactorGraph:
                     itrs=itrs, lm=1e-5, ep=1e-2, motion_only=False)
 
                 self.video.dirty[:t] = True
+            
+            # Calculate reprojection error after each BA iteration
+        with torch.no_grad():
+            coords1, mask = self.video.reproject(self.ii, self.jj)
+            
+            # Calculate pixel-wise reprojection error
+            target_reshaped = target.permute(0, 2, 3, 1).unsqueeze(0)
+            error = torch.sqrt(((coords1 - target_reshaped) ** 2).sum(dim=-1))
+            
+            # Only consider valid points
+            valid_errors = error[mask.squeeze(-1).bool()]
+            return valid_errors
 
     def add_neighborhood_factors(self, t0, t1, r=3):
         """add edges between neighboring frames within radius r"""

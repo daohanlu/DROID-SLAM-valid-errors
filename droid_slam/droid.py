@@ -68,7 +68,7 @@ class Droid:
             # local bundle adjustment
             self.frontend()
 
-    def terminate(self, stream=None):
+    def terminate(self, stream=None, return_valid_errors=False):
         """ terminate the visualization process, return poses [t, q] """
 
         del self.frontend
@@ -79,8 +79,11 @@ class Droid:
 
         torch.cuda.empty_cache()
         print("#" * 32)
-        self.backend(12)
+        valid_errors = self.backend(12)
 
         camera_trajectory = self.traj_filler(stream)
-        return camera_trajectory.inv().data.cpu().numpy()
+        if return_valid_errors:
+            return camera_trajectory.inv().data.cpu().numpy(), valid_errors
+        else:
+            return camera_trajectory.inv().data.cpu().numpy()
 
